@@ -1,0 +1,24 @@
+# Runs ONLY the web app:  docker compose up --build
+#
+# It does not start a backend. Start the fitness-backend project separately (it
+# serves the API on http://localhost:8080 by default). The two projects share
+# nothing except HTTP: this app only needs to know the API's address.
+
+name: fitness-frontend
+
+services:
+  frontend:
+    build:
+      context: .
+      args:
+        # Baked into the JavaScript at build time. It is the address your BROWSER
+        # uses to reach the API gateway, so it is localhost, not a container name.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/login"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
